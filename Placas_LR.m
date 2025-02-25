@@ -7,12 +7,12 @@ pkg load io
 % Placa reconhecida no vestígio (a ser analisada)
 % Cada elemento do cell array representa possíveis caracteres da placa
 % Deixe em branco aqueles caracteres não reconhecidos
-QST{1}={[""];[""];[""];["132"];["J"];["320"];["4"]};
+QST{1}={["R"];["B"];["O"];["6"];["E"];["2"];["9"]};
 % Subconjunto para pesquisa
-QST{2}={["KRS"];["QRVYWNM"];["VYWNM"];["13"];["J"];["32"];["4"]};
+QST{2}={["R"];["B"];["O"];["6"];["E"];["2"];["9"]};
 %SE NÃO CONTEMPLAR TODOS OS CARACTERES DO SUSPEITO,  NÃO FUNCIONARÁ
 %% Ano limite do modelo que aparece nas imagens
-ano=2011;
+ano=2021;
 
 
 % Padrão MERCOSUL?
@@ -20,14 +20,14 @@ ano=2011;
 MS = 1; %NÃO CONFIGURE UMA COISA E FORNEÇA OUTRA NOS CANDIDATOS OU SUSPEITO
 
 % Placa do suspeito, caso exista
-SUSP = ["KVM3J24"];
+SUSP = ["RBO6E29"];
 
 % Unidade Federativa (UF) de interesse
 uf = "RJ";
 
 % Controle: usar ou não a matriz de confusão
 % 1 para usar, 0 para não usar
-confusao = 1;
+confusao = 0;
 
 % Proporção da frota de fora da UF de interesse (valor default: 33%)
 pf = 0.33; % Valor padrão usado para eventos singulares
@@ -151,6 +151,7 @@ nn = ESTADOS{end-2, 1}; % Valor da frota nacional (IBGE)
 % Determinar o tamanho da frota da unidade federativa de interesse
 % Utilizamos a posição 'p_uf' (definida anteriormente) para acessar a coluna da UF
 nuf = ESTADOS{end-2, p_uf}; % Valor da frota da unidade federativa (IBGE)
+
 
 
 
@@ -304,7 +305,7 @@ if size(CAND, 1) > 1
 end
 
 % Calcula LLR se houver suspeito
-if exist("SUSP")
+if exist("SUSP") && size(CAND, 1) > 1
     sus = find(sum(CAND(:, 1:7) == SUSP, 2) == 7);
     lgc=ones(length(LL),1);
     lgc(sus)=2;
@@ -329,7 +330,10 @@ if exist("SUSP")
     pLL = Pp .* LL .* lgc;
     LLR = log10(LL(sus) / (sum(pLL)));
     ["LOG(", num2str(LL(sus) * 100, 3), "%/", num2str(sum(pLL) * 100, 3), "%) = ", num2str(LLR, 3)]
-    end
+  end
+elseif qst==1
+ LLR = log10(LL / Pp*pt*pc*pm);
+["LOG(", num2str(LL * 100, 3), "%/", num2str(Pp*pt*pc*pm * 100, 3), "%) = ", num2str(LLR, 3)]
 end
 
 %% SALVANDO AS COMBINAÇÕES EM CSV
